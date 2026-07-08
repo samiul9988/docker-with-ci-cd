@@ -124,6 +124,58 @@ class CategoryScraper
         return $categories;
     }
 
+    public function scrapeBrands(): array
+    {
+        Log::info('Scraping brands from shop page');
+
+        $shopUrl = $this->baseUrl . '/shop/';
+
+        try {
+            $html = $this->fetchUrl($shopUrl);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch shop page: ' . $e->getMessage());
+
+            return [];
+        }
+
+        $crawler = new Crawler($html);
+
+        $brands = [];
+        $seen = [];
+
+        $crawler->filter('a[href*="/attribute/brand/"]')->each(function (Crawler $node) use (&$brands, &$seen) {
+            $url = $this->normalizeUrl($node->attr('href'));
+
+            if (! $url || in_array($url, $seen)) {
+                return;
+            }
+
+            $name = trim($node->text());
+
+            if (empty($name)) {
+                return;
+            }
+
+            $path = parse_url($url, PHP_URL_PATH);
+            $path = trim($path, '/');
+            $parts = explode('/', $path);
+            $slug = end($parts);
+
+            $seen[] = $url;
+
+            $brands[] = [
+                'id' => count($brands) + 1,
+                'name' => $name,
+                'slug' => $slug,
+                'url' => $url,
+            ];
+        });
+
+        Log::info('Scraped ' . count($brands) . ' brands');
+
+        return $brands;
+    }
+
     public function scrapeFromShopPage(): array
     {
         Log::info('Starting category scraping from shop page');

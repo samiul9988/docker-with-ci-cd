@@ -183,10 +183,29 @@ class ProductScraper
 
         $crawler = new Crawler($html);
 
-        $featuredSection = $crawler->filter('.featured-products, .featured, .onsale, .products.featured, [class*="featured"]');
+        $selectors = [
+            '.featured-products',
+            '.featured',
+            '.products.featured',
+            '.onsale',
+            '[class*="featured"]',
+            '.wc-block-featured-product',
+            '.wp-block-woocommerce-featured-product',
+            '.home-featured',
+            '.product-carousel',
+            '.products',
+        ];
 
-        if ($featuredSection->count() > 0) {
-            return array_slice($this->parseProductList($featuredSection->first()), 0, $limit);
+        foreach ($selectors as $selector) {
+            $section = $crawler->filter($selector);
+            if ($section->count() > 0) {
+                $products = $this->parseProductList($section->first());
+                if (! empty($products)) {
+                    Log::info("Found " . count($products) . " products via selector: {$selector}");
+
+                    return array_slice($products, 0, $limit);
+                }
+            }
         }
 
         return array_slice($this->parseProductList($crawler), 0, $limit);
@@ -223,6 +242,20 @@ class ProductScraper
             'current_page' => $page,
             'total_products' => $this->parseTotalProducts($crawler),
         ];
+    }
+
+    public function scrapeSpecialPage(string $page, int $pageNum = 1, int $perPage = 12): array
+    {
+        $url = $this->baseUrl . '/' . ltrim($page, '/') . '/';
+
+        return $this->scrapeCategoryUrl($url, $pageNum, $perPage);
+    }
+
+    public function scrapeBrandProducts(string $brandSlug, int $page = 1, int $perPage = 12): array
+    {
+        $url = $this->baseUrl . '/attribute/brand/' . $brandSlug . '/';
+
+        return $this->scrapeCategoryUrl($url, $page, $perPage);
     }
 
     protected function parseProductList(Crawler $crawler): array

@@ -62,6 +62,21 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
+    public function brands(): JsonResponse
+    {
+        $cacheKey = 'scraper_brands_all';
+
+        try {
+            $brands = Cache::store('file')->remember($cacheKey, config('scraper.cache_ttl', 3600), function () {
+                return $this->categoryScraper->scrapeBrands();
+            });
+
+            return response()->json($brands ?: []);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 502);
+        }
+    }
+
     public function products(Request $request, ?string $slug = null): JsonResponse
     {
         $page = (int) $request->input('page', 1);

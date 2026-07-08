@@ -103,4 +103,56 @@ class ProductController extends Controller
 
         return response()->json($result);
     }
+
+    public function newProducts(Request $request): JsonResponse
+    {
+        return $this->specialPage('new', $request);
+    }
+
+    public function clearanceSale(Request $request): JsonResponse
+    {
+        return $this->specialPage('clearance-sale', $request);
+    }
+
+    public function preOrder(Request $request): JsonResponse
+    {
+        return $this->specialPage('pre-order', $request);
+    }
+
+    public function brandProducts(string $slug, Request $request): JsonResponse
+    {
+        $page = (int) $request->input('page', 1);
+        $perPage = (int) $request->input('per_page', 12);
+        $sort = $request->input('sort', 'default');
+
+        $cacheKey = "scraper_brand_{$slug}_page_{$page}_per_{$perPage}";
+
+        try {
+            $result = Cache::store('file')->remember($cacheKey, config('scraper.cache_ttl', 3600), function () use ($slug, $page, $perPage) {
+                return $this->productScraper->scrapeBrandProducts($slug, $page, $perPage);
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage(), 'data' => []], 502);
+        }
+
+        return response()->json($result);
+    }
+
+    protected function specialPage(string $page, Request $request): JsonResponse
+    {
+        $pageNum = (int) $request->input('page', 1);
+        $perPage = (int) $request->input('per_page', 12);
+
+        $cacheKey = "scraper_special_{$page}_page_{$pageNum}_per_{$perPage}";
+
+        try {
+            $result = Cache::store('file')->remember($cacheKey, config('scraper.cache_ttl', 3600), function () use ($page, $pageNum, $perPage) {
+                return $this->productScraper->scrapeSpecialPage($page, $pageNum, $perPage);
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage(), 'data' => []], 502);
+        }
+
+        return response()->json($result);
+    }
 }
