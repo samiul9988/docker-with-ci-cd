@@ -107,7 +107,7 @@ class CategoryController extends Controller
             $categoryUrl = $match['url'] ?? null;
 
             if (! $categoryUrl) {
-                $categoryUrl = config('scraper.base_url') . '/product-category/' . $slug . '/';
+                $categoryUrl = config('scraper.base_url').'/product-category/'.$slug.'/';
             }
         }
 
@@ -115,7 +115,7 @@ class CategoryController extends Controller
             return $this->searchProducts($search, $page, $perPage);
         }
 
-        $cacheKey = 'scraper_cat_products_' . md5($categoryUrl) . "_{$page}_{$perPage}_{$sort}";
+        $cacheKey = 'scraper_cat_products_'.md5($categoryUrl)."_{$page}_{$perPage}_{$sort}";
 
         try {
             $result = Cache::store('file')->remember($cacheKey, config('scraper.cache_ttl', 3600), function () use ($categoryUrl, $page, $perPage) {

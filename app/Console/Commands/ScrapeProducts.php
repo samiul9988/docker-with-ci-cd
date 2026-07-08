@@ -70,7 +70,7 @@ class ScrapeProducts extends Command
         }
 
         $this->newLine(2);
-        $this->info("Total products scraped: " . count($allProducts));
+        $this->info('Total products scraped: '.count($allProducts));
 
         return self::SUCCESS;
     }
@@ -91,7 +91,7 @@ class ScrapeProducts extends Command
             return self::FAILURE;
         }
 
-        $this->info('Found ' . count($categories) . ' categories.');
+        $this->info('Found '.count($categories).' categories.');
 
         $totalProducts = 0;
 

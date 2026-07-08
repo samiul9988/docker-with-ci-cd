@@ -36,10 +36,10 @@ class ScrapeProductDetail extends Command
         $this->line("  Brand: {$product['brand']}");
         $this->line("  Stock: {$product['stock_status']}");
         $this->line("  Rating: {$product['rating']} ({$product['review_count']} reviews)");
-        $this->line("  Categories: " . implode(', ', $product['categories']));
-        $this->line("  Tags: " . implode(', ', $product['tags']));
+        $this->line('  Categories: '.implode(', ', $product['categories']));
+        $this->line('  Tags: '.implode(', ', $product['tags']));
         $this->line("  Featured Image: {$product['featured_image']}");
-        $this->line("  Gallery Images: " . count($product['gallery_images']));
+        $this->line('  Gallery Images: '.count($product['gallery_images']));
 
         if (! empty($product['featured_image'])) {
             $downloaded = $imageDownloader->download($product['featured_image'], $product['slug'], 0);

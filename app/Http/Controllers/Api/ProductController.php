@@ -21,10 +21,10 @@ class ProductController extends Controller
         $productUrl = $request->input('url');
 
         if (! $productUrl) {
-            $productUrl = config('scraper.base_url') . '/product/' . $slug . '/';
+            $productUrl = config('scraper.base_url').'/product/'.$slug.'/';
         }
 
-        $cacheKey = 'scraper_product_' . md5($productUrl);
+        $cacheKey = 'scraper_product_'.md5($productUrl);
 
         try {
             $product = Cache::store('file')->remember($cacheKey, config('scraper.cache_ttl', 3600), function () use ($productUrl) {

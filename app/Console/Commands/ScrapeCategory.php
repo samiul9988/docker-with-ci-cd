@@ -79,7 +79,7 @@ class ScrapeCategory extends Command
         }
 
         $this->newLine();
-        $this->info("=== Complete ===");
+        $this->info('=== Complete ===');
         $this->info("Products scraped: {$totalProducts}");
 
         if ($downloadImages) {

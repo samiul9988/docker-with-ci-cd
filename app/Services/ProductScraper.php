@@ -5,7 +5,6 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler;
 
 class ProductScraper
@@ -39,7 +38,7 @@ class ProductScraper
     protected function getClient(): Client
     {
         if ($this->httpClient === null) {
-            $this->cookieJar = new CookieJar();
+            $this->cookieJar = new CookieJar;
 
             $this->httpClient = new Client([
                 'verify' => false,
@@ -61,7 +60,7 @@ class ProductScraper
 
     public function scrapeCategory(string $categorySlug, int $page = 1, int $perPage = 12): array
     {
-        $categoryUrl = $this->baseUrl . '/product-category/' . $categorySlug . '/';
+        $categoryUrl = $this->baseUrl.'/product-category/'.$categorySlug.'/';
 
         return $this->scrapeCategoryUrl($categoryUrl, $page, $perPage);
     }
@@ -71,7 +70,7 @@ class ProductScraper
         $url = rtrim($url, '/');
 
         if ($page > 1) {
-            $url .= '/page/' . $page . '/';
+            $url .= '/page/'.$page.'/';
         }
 
         $url .= '/';
@@ -81,7 +80,7 @@ class ProductScraper
         try {
             $html = $this->fetchUrl($url);
         } catch (\Exception $e) {
-            Log::error("Failed to fetch category page {$url}: " . $e->getMessage());
+            Log::error("Failed to fetch category page {$url}: ".$e->getMessage());
 
             return [
                 'products' => [],
@@ -103,7 +102,7 @@ class ProductScraper
 
         $totalProducts = $this->parseTotalProducts($crawler);
 
-        Log::info("Scraped " . count($products) . " products from page {$page}, total pages: {$totalPages}");
+        Log::info('Scraped '.count($products)." products from page {$page}, total pages: {$totalPages}");
 
         return [
             'products' => $products,
@@ -140,7 +139,7 @@ class ProductScraper
         try {
             $html = $this->fetchUrl($productUrl);
         } catch (\Exception $e) {
-            Log::error("Failed to fetch product detail {$productUrl}: " . $e->getMessage());
+            Log::error("Failed to fetch product detail {$productUrl}: ".$e->getMessage());
 
             return null;
         }
@@ -152,14 +151,14 @@ class ProductScraper
 
     public function scrapeLatestProducts(int $limit = 20): array
     {
-        $shopUrl = $this->baseUrl . '/shop/';
+        $shopUrl = $this->baseUrl.'/shop/';
 
-        Log::info("Scraping latest products from shop page");
+        Log::info('Scraping latest products from shop page');
 
         try {
             $html = $this->fetchUrl($shopUrl);
         } catch (\Exception $e) {
-            Log::error("Failed to fetch shop page: " . $e->getMessage());
+            Log::error('Failed to fetch shop page: '.$e->getMessage());
 
             return [];
         }
@@ -171,12 +170,12 @@ class ProductScraper
 
     public function scrapeFeaturedProducts(int $limit = 20): array
     {
-        Log::info("Scraping featured products from home page");
+        Log::info('Scraping featured products from home page');
 
         try {
-            $html = $this->fetchUrl($this->baseUrl . '/');
+            $html = $this->fetchUrl($this->baseUrl.'/');
         } catch (\Exception $e) {
-            Log::error("Failed to fetch home page: " . $e->getMessage());
+            Log::error('Failed to fetch home page: '.$e->getMessage());
 
             return [];
         }
@@ -201,7 +200,7 @@ class ProductScraper
             if ($section->count() > 0) {
                 $products = $this->parseProductList($section->first());
                 if (! empty($products)) {
-                    Log::info("Found " . count($products) . " products via selector: {$selector}");
+                    Log::info('Found '.count($products)." products via selector: {$selector}");
 
                     return array_slice($products, 0, $limit);
                 }
@@ -213,10 +212,10 @@ class ProductScraper
 
     public function searchProducts(string $query, int $page = 1, int $perPage = 12): array
     {
-        $searchUrl = $this->baseUrl . '/?s=' . urlencode($query) . '&post_type=product';
+        $searchUrl = $this->baseUrl.'/?s='.urlencode($query).'&post_type=product';
 
         if ($page > 1) {
-            $searchUrl .= '&paged=' . $page;
+            $searchUrl .= '&paged='.$page;
         }
 
         Log::info("Searching products with query: {$query}");
@@ -224,7 +223,7 @@ class ProductScraper
         try {
             $html = $this->fetchUrl($searchUrl);
         } catch (\Exception $e) {
-            Log::error("Search failed: " . $e->getMessage());
+            Log::error('Search failed: '.$e->getMessage());
 
             return [
                 'products' => [],
@@ -246,14 +245,14 @@ class ProductScraper
 
     public function scrapeSpecialPage(string $page, int $pageNum = 1, int $perPage = 12): array
     {
-        $url = $this->baseUrl . '/' . ltrim($page, '/') . '/';
+        $url = $this->baseUrl.'/'.ltrim($page, '/').'/';
 
         return $this->scrapeCategoryUrl($url, $pageNum, $perPage);
     }
 
     public function scrapeBrandProducts(string $brandSlug, int $page = 1, int $perPage = 12): array
     {
-        $url = $this->baseUrl . '/attribute/brand/' . $brandSlug . '/';
+        $url = $this->baseUrl.'/attribute/brand/'.$brandSlug.'/';
 
         return $this->scrapeCategoryUrl($url, $page, $perPage);
     }
@@ -685,7 +684,7 @@ class ProductScraper
         }
 
         if (! str_starts_with($url, 'http')) {
-            $url = $this->baseUrl . '/' . ltrim($url, '/');
+            $url = $this->baseUrl.'/'.ltrim($url, '/');
         }
 
         return rtrim($url, '/');
@@ -734,8 +733,8 @@ class ProductScraper
     protected function cloudflareException(): \RuntimeException
     {
         return new \RuntimeException(
-            'Target site is protected by Cloudflare anti-bot protection. ' .
-            'Standard HTTP requests are blocked. Cannot bypass JavaScript challenge. ' .
+            'Target site is protected by Cloudflare anti-bot protection. '.
+            'Standard HTTP requests are blocked. Cannot bypass JavaScript challenge. '.
             'Consider using a headless browser like Puppeteer or Selenium for this site.'
         );
     }

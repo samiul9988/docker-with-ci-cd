@@ -13,7 +13,7 @@ class ScrapeCategories extends Command
 
     public function handle(CategoryScraper $scraper): int
     {
-        $this->info('Scraping categories from ' . config('scraper.base_url') . '...');
+        $this->info('Scraping categories from '.config('scraper.base_url').'...');
 
         try {
             $categories = $scraper->scrape();
@@ -32,7 +32,7 @@ class ScrapeCategories extends Command
                 return self::FAILURE;
             }
 
-            $this->info('Found ' . count($categories) . ' categories:');
+            $this->info('Found '.count($categories).' categories:');
             $this->newLine();
 
             foreach ($categories as $category) {

@@ -50,9 +50,9 @@ class ImageDownloaderService
 
         $filename = $this->generateFilename($productSlug, $extension, $index);
 
-        $savePath = $this->directory . '/' . $productSlug;
+        $savePath = $this->directory.'/'.$productSlug;
 
-        $fullPath = $savePath . '/' . $filename;
+        $fullPath = $savePath.'/'.$filename;
 
         if (Storage::disk($this->disk)->exists($fullPath)) {
             return [
@@ -67,7 +67,7 @@ class ImageDownloaderService
         $client = new Client([
             'verify' => false,
             'timeout' => $this->timeout,
-            'cookies' => new CookieJar(),
+            'cookies' => new CookieJar,
             'headers' => [
                 'User-Agent' => config('scraper.user_agent'),
             ],
@@ -138,10 +138,10 @@ class ImageDownloaderService
 
     protected function generateFilename(string $productSlug, string $extension, ?int $index = null): string
     {
-        $suffix = $index !== null ? '-' . ($index + 1) : '-1';
-        $hash = substr(md5($productSlug . $suffix . time()), 0, 8);
+        $suffix = $index !== null ? '-'.($index + 1) : '-1';
+        $hash = substr(md5($productSlug.$suffix.time()), 0, 8);
 
-        return Str::slug($productSlug) . $suffix . '-' . $hash . '.' . $extension;
+        return Str::slug($productSlug).$suffix.'-'.$hash.'.'.$extension;
     }
 
     protected function getExtension(string $url): string

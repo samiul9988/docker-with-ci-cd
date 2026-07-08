@@ -39,7 +39,7 @@ class ScrapeAll extends Command
             return self::FAILURE;
         }
 
-        $this->info('Found ' . count($categories) . ' categories.');
+        $this->info('Found '.count($categories).' categories.');
         $this->newLine();
 
         $totalProducts = 0;

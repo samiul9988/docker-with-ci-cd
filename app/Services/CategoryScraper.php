@@ -5,7 +5,6 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler;
 
 class CategoryScraper
@@ -36,7 +35,7 @@ class CategoryScraper
     protected function getClient(): Client
     {
         if ($this->httpClient === null) {
-            $this->cookieJar = new CookieJar();
+            $this->cookieJar = new CookieJar;
 
             $this->httpClient = new Client([
                 'verify' => false,
@@ -58,12 +57,12 @@ class CategoryScraper
 
     public function scrape(): array
     {
-        Log::info('Starting category scraping from ' . $this->baseUrl);
+        Log::info('Starting category scraping from '.$this->baseUrl);
 
         try {
             $html = $this->fetchUrl($this->baseUrl);
         } catch (\Exception $e) {
-            Log::error('Failed to fetch base URL: ' . $e->getMessage());
+            Log::error('Failed to fetch base URL: '.$e->getMessage());
 
             return [];
         }
@@ -119,7 +118,7 @@ class CategoryScraper
             return ! empty($cat['slug']) && $cat['slug'] !== 'product-category';
         }));
 
-        Log::info('Scraped ' . count($categories) . ' categories');
+        Log::info('Scraped '.count($categories).' categories');
 
         return $categories;
     }
@@ -128,12 +127,12 @@ class CategoryScraper
     {
         Log::info('Scraping brands from shop page');
 
-        $shopUrl = $this->baseUrl . '/shop/';
+        $shopUrl = $this->baseUrl.'/shop/';
 
         try {
             $html = $this->fetchUrl($shopUrl);
         } catch (\Exception $e) {
-            Log::error('Failed to fetch shop page: ' . $e->getMessage());
+            Log::error('Failed to fetch shop page: '.$e->getMessage());
 
             return [];
         }
@@ -171,7 +170,7 @@ class CategoryScraper
             ];
         });
 
-        Log::info('Scraped ' . count($brands) . ' brands');
+        Log::info('Scraped '.count($brands).' brands');
 
         return $brands;
     }
@@ -180,12 +179,12 @@ class CategoryScraper
     {
         Log::info('Starting category scraping from shop page');
 
-        $shopUrl = $this->baseUrl . '/shop/';
+        $shopUrl = $this->baseUrl.'/shop/';
 
         try {
             $html = $this->fetchUrl($shopUrl);
         } catch (\Exception $e) {
-            Log::error('Failed to fetch shop page: ' . $e->getMessage());
+            Log::error('Failed to fetch shop page: '.$e->getMessage());
 
             return [];
         }
@@ -236,7 +235,7 @@ class CategoryScraper
             return ! empty($cat['slug']) && $cat['slug'] !== 'product-category';
         }));
 
-        Log::info('Scraped ' . count($categories) . ' categories from shop page');
+        Log::info('Scraped '.count($categories).' categories from shop page');
 
         return $categories;
     }
@@ -309,7 +308,7 @@ class CategoryScraper
         }
 
         if (! str_starts_with($url, 'http')) {
-            $url = $this->baseUrl . '/' . ltrim($url, '/');
+            $url = $this->baseUrl.'/'.ltrim($url, '/');
         }
 
         $url = rtrim($url, '/');
@@ -360,8 +359,8 @@ class CategoryScraper
     protected function cloudflareException(): \RuntimeException
     {
         return new \RuntimeException(
-            'Target site is protected by Cloudflare anti-bot protection. ' .
-            'Standard HTTP requests are blocked. Cannot bypass JavaScript challenge. ' .
+            'Target site is protected by Cloudflare anti-bot protection. '.
+            'Standard HTTP requests are blocked. Cannot bypass JavaScript challenge. '.
             'Consider using a headless browser like Puppeteer or Selenium for this site.'
         );
     }
