@@ -313,13 +313,7 @@ class ProductScraper
         $imageUrl = '';
 
         if ($imgNode->count() > 0) {
-            $imageUrl = $imgNode->first()->attr('src');
-            if (empty($imageUrl)) {
-                $imageUrl = $imgNode->first()->attr('data-src');
-            }
-            if (empty($imageUrl)) {
-                $imageUrl = $imgNode->first()->attr('data-lazy-src');
-            }
+            $imageUrl = $this->extractImageUrl($imgNode->first());
         }
 
         $regularPriceNode = $node->filter('del .woocommerce-Price-amount, del .amount, .regular-price .amount, .price del');
@@ -457,23 +451,14 @@ class ProductScraper
         $featuredImageNode = $crawler->filter('.woocommerce-product-gallery__image img, .wp-post-image, .product-image img, .featured-image img');
 
         if ($featuredImageNode->count() > 0) {
-            $featuredImage = $featuredImageNode->first()->attr('src');
-            if (empty($featuredImage)) {
-                $featuredImage = $featuredImageNode->first()->attr('data-src');
-            }
+            $featuredImage = $this->extractImageUrl($featuredImageNode->first());
         }
 
         $galleryImages = [];
         $galleryNodes = $crawler->filter('.woocommerce-product-gallery__image img, .product-thumbnails img, .flex-control-nav img, .gallery-image img');
 
         $galleryNodes->each(function (Crawler $node) use (&$galleryImages) {
-            $src = $node->attr('src');
-            if (empty($src)) {
-                $src = $node->attr('data-src');
-            }
-            if (empty($src)) {
-                $src = $node->attr('data-large_image');
-            }
+            $src = $this->extractImageUrl($node);
             if ($src && ! in_array($src, $galleryImages)) {
                 $galleryImages[] = $src;
             }
@@ -688,6 +673,83 @@ class ProductScraper
         }
 
         return rtrim($url, '/');
+    }
+
+    protected function extractImageUrl(Crawler $node): string
+    {
+        $src = $node->attr('data-large_image');
+        if ($src && $this->isValidImageUrl($src)) {
+            return $src;
+        }
+
+        $src = $node->attr('data-src');
+        if ($src && $this->isValidImageUrl($src)) {
+            return $src;
+        }
+
+        $src = $node->attr('src');
+        if ($src && $this->isValidImageUrl($src)) {
+            return $src;
+        }
+
+        $src = $node->attr('data-lazy-src');
+        if ($src && $this->isValidImageUrl($src)) {
+            return $src;
+        }
+
+        $srcset = $node->attr('srcset');
+        if ($srcset) {
+            $parts = explode(',', $srcset);
+            $largest = '';
+            $largestW = 0;
+            foreach ($parts as $part) {
+                $part = trim($part);
+                if (preg_match('/^(\S+)\s+(\d+)w$/', $part, $m)) {
+                    if ((int) $m[2] > $largestW) {
+                        $largestW = (int) $m[2];
+                        $largest = $m[1];
+                    }
+                } elseif ($largest === '') {
+                    $largest = $part;
+                }
+            }
+            if ($largest && $this->isValidImageUrl($largest)) {
+                return $largest;
+            }
+        }
+
+        return '';
+    }
+
+    protected function isValidImageUrl(string $url): bool
+    {
+        if (empty($url)) {
+            return false;
+        }
+
+        $lower = strtolower($url);
+
+        $placeholders = ['lazy.svg', 'placeholder', 'blank', 'transparent', '1x1', 'spacer', 'pixel'];
+        foreach ($placeholders as $p) {
+            if (str_contains($lower, $p)) {
+                return false;
+            }
+        }
+
+        $extensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'];
+        $hasImageExt = false;
+        foreach ($extensions as $ext) {
+            if (str_contains($lower, $ext)) {
+                $hasImageExt = true;
+                break;
+            }
+        }
+
+        if (! $hasImageExt && ! str_contains($lower, '/uploads/') && ! str_contains($lower, '/wp-content/')) {
+            return false;
+        }
+
+        return true;
     }
 
     public function fetchUrl(string $url): string

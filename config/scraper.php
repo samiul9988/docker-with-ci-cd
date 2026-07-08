@@ -20,7 +20,7 @@ return [
 
     'max_pages' => env('SCRAPER_MAX_PAGES', 0),
 
-    'download_images' => env('SCRAPER_DOWNLOAD_IMAGES', true),
+    'download_images' => env('SCRAPER_DOWNLOAD_IMAGES', false),
 
     'allowed_image_types' => ['jpg', 'jpeg', 'png', 'webp', 'gif'],
 

@@ -38,24 +38,6 @@ class ProductController extends Controller
             return response()->json(['message' => 'Product not found or unable to access the target site.'], 404);
         }
 
-        if (config('scraper.download_images', true)) {
-            if (! empty($product['featured_image'])) {
-                $featured = $this->imageDownloader->download(
-                    $product['featured_image'],
-                    $product['slug'],
-                    0
-                );
-                $product['featured_image_local'] = $featured;
-            }
-
-            if (! empty($product['gallery_images'])) {
-                $product['gallery_images_local'] = $this->imageDownloader->downloadGallery(
-                    $product['gallery_images'],
-                    $product['slug']
-                );
-            }
-        }
-
         return response()->json($product);
     }
 
